@@ -2,7 +2,7 @@ name: Compilar APK de Mi Bodega
 
 on:
   push:
-    branches: [ "principal" ]
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
