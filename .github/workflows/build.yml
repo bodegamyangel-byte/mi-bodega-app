@@ -25,22 +25,20 @@ jobs:
         sudo apt-get install -y libncurses5 libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
         pip3 install --user --upgrade buildozer cython==0.29.33
 
-    - name: Pre-instalar herramientas de Android
+    - name: Inyectar Licencias Android
       run: |
-        # Primero instalamos el SDK básico para tener acceso al sdkmanager
-        # (Esto es un paso técnico para asegurar que tenemos las herramientas necesarias)
-        buildozer android debug || true
+        # Creamos la carpeta de licencias en la ruta exacta donde Buildozer instala el SDK
+        mkdir -p $HOME/.buildozer/android/platform/android-sdk/licenses
         
-        # Ahora instalamos explícitamente los build-tools 33.0.0 que son estables
-        # y aceptamos licencias de todo lo que falte
-        SDKMANAGER=$HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager
-        yes | $SDKMANAGER "build-tools;33.0.0"
-        yes | $SDKMANAGER --licenses
+        # Inyectamos los archivos de licencia que el SDK manager busca
+        echo "8933bad161af4178b1185d1a37fbf41ea5261c55" > $HOME/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        echo "d56f51874737515e191356c5a61400c41872146e" >> $HOME/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        echo "84831b9409646a918e30573bab4c9c91346d8a43" >> $HOME/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
 
     - name: Compilar APK
       run: |
         export PATH=$PATH:~/.local/bin
-        # Ahora Buildozer debería encontrar los tools 33 instalados y no intentar bajar los 37
+        # Buildozer ya no debería pedir licencias porque ya están ahí
         buildozer android debug
 
     - name: Guardar el archivo APK resultante
