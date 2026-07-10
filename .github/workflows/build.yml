@@ -31,21 +31,24 @@ jobs:
     - name: Compilar con Buildozer (Pre-descarga)
       run: |
         export PATH=$PATH:~/.local/bin
-        # Intentamos compilar una vez, fallará, pero descargará todo
+        # Primera pasada: descargará las herramientas
         buildozer android debug || true
 
-    - name: Forzar ubicación de SDK Manager
+    - name: Aceptar licencias proactivamente
       run: |
-        # Creamos la estructura que Buildozer necesita desesperadamente
+        # Localizamos el sdkmanager que Buildozer descargó
+        SDKMANAGER=$HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager
+        if [ -f "$SDKMANAGER" ]; then
+          # Ejecutamos el comando para aceptar todas las licencias automáticamente
+          yes | $SDKMANAGER --licenses
+        fi
+
+    - name: Forzar ubicación de herramientas (Fix adicional)
+      run: |
         mkdir -p $HOME/.buildozer/android/platform/android-sdk/tools/bin
-        
-        # Copiamos todo lo de cmdline-tools a la carpeta donde Buildozer lo busca
         if [ -d "$HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin" ]; then
            cp -r $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/* $HOME/.buildozer/android/platform/android-sdk/tools/bin/
         fi
-        
-        # Damos permisos de ejecución
-        chmod +x $HOME/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
 
     - name: Compilar (Intento Final)
       run: |
