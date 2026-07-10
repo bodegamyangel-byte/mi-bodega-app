@@ -27,7 +27,9 @@ def get_db_path():
         if os.path.exists(ruta_origen):
             shutil.copy(ruta_origen, ruta_destino)
             
-    return ruta_destino ==========================================
+    return ruta_destino
+
+# ==========================================
 # 1. CREACIÓN DE TABLAS LOCALES (OFFLINE)
 # ==========================================
 def preparar_base_datos_local():
@@ -464,7 +466,11 @@ class AppBodega(MDApp):
             self.mostrar_alerta("Error", "No hay ventas para exportar.")
             return
             
-        nombre_archivo = f"Ventas_Exportadas_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        # Mejora de Android: Se guarda en el directorio de usuario seguro de la App
+        nombre_archivo = os.path.join(
+            App.get_running_app().user_data_dir, 
+            f"Ventas_Exportadas_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        )
         
         # Obtener categorías de la base de datos local para la exportación
         cursor.execute("SELECT nombre, categoria FROM productos")
@@ -526,7 +532,7 @@ class AppBodega(MDApp):
             if self.dialog_ventas:
                 self.dialog_ventas.dismiss()
                 
-            self.mostrar_alerta("✅ Éxito", f"Archivo generado:\n{nombre_archivo}\n\nPuedes abrir este archivo directamente en Excel. Se ha guardado en la misma carpeta de la aplicación.")
+            self.mostrar_alerta("✅ Éxito", f"Archivo generado correctamente.\nRuta: {nombre_archivo}")
         except Exception as e:
             self.mostrar_alerta("Error", f"No se pudo exportar el archivo: {str(e)}")
 
