@@ -25,24 +25,22 @@ jobs:
         sudo apt-get install -y libncurses5 libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
         pip3 install --user --upgrade buildozer cython==0.29.33
 
-    - name: Aceptar licencias y Preparar SDK
+    - name: Pre-instalar herramientas de Android
       run: |
-        # Intentamos compilar una vez para que Buildozer descargue las herramientas
-        # Esto fallará, pero es necesario para que las herramientas existan
+        # Primero instalamos el SDK básico para tener acceso al sdkmanager
+        # (Esto es un paso técnico para asegurar que tenemos las herramientas necesarias)
         buildozer android debug || true
         
-        # Encontramos dónde está el sdkmanager
+        # Ahora instalamos explícitamente los build-tools 33.0.0 que son estables
+        # y aceptamos licencias de todo lo que falte
         SDKMANAGER=$HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager
-        
-        # Forzamos la aceptación de todas las licencias
-        if [ -f "$SDKMANAGER" ]; then
-          yes | $SDKMANAGER --licenses || true
-        fi
+        yes | $SDKMANAGER "build-tools;33.0.0"
+        yes | $SDKMANAGER --licenses
 
     - name: Compilar APK
       run: |
         export PATH=$PATH:~/.local/bin
-        # Compilación final
+        # Ahora Buildozer debería encontrar los tools 33 instalados y no intentar bajar los 37
         buildozer android debug
 
     - name: Guardar el archivo APK resultante
