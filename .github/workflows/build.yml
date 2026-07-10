@@ -28,18 +28,23 @@ jobs:
       run: |
         pip3 install --user --upgrade buildozer cython==0.29.33
 
-    - name: Aceptar licencias de Android SDK
+    - name: Aceptar licencias de Android SDK (en todos lados)
       run: |
-        # Esto crea los archivos de licencia aceptada que el SDK manager busca
+        # Creamos las carpetas de licencias donde Buildozer las busca
         mkdir -p ~/.android/licenses
+        mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+        
+        # Copiamos los archivos de aceptación en ambos sitios
         echo "8933bad161af4178b1185d1a37fbf41ea5261c55" > ~/.android/licenses/android-sdk-license
         echo "d56f51874737515e191356c5a61400c41872146e" >> ~/.android/licenses/android-sdk-license
         echo "84831b9409646a918e30573bab4c9c91346d8a43" >> ~/.android/licenses/android-sdk-license
+        
+        cp ~/.android/licenses/* ~/.buildozer/android/platform/android-sdk/licenses/
 
     - name: Compilar con Buildozer
       run: |
         export PATH=$PATH:~/.local/bin
-        # Ahora Buildozer no debería detenerse por licencias
+        # Forzamos la compilación
         buildozer android debug
 
     - name: Guardar el archivo APK resultante
