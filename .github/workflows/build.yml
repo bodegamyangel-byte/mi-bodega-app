@@ -28,23 +28,27 @@ jobs:
       run: |
         pip3 install --user --upgrade buildozer cython==0.29.33
 
-    - name: Aceptar licencias de Android SDK (en todos lados)
+    - name: Pre-configurar carpetas para Buildozer
       run: |
-        # Creamos las carpetas de licencias donde Buildozer las busca
-        mkdir -p ~/.android/licenses
-        mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
-        
-        # Copiamos los archivos de aceptación en ambos sitios
-        echo "8933bad161af4178b1185d1a37fbf41ea5261c55" > ~/.android/licenses/android-sdk-license
-        echo "d56f51874737515e191356c5a61400c41872146e" >> ~/.android/licenses/android-sdk-license
-        echo "84831b9409646a918e30573bab4c9c91346d8a43" >> ~/.android/licenses/android-sdk-license
-        
-        cp ~/.android/licenses/* ~/.buildozer/android/platform/android-sdk/licenses/
+        # Creamos las carpetas donde Buildozer espera encontrar cosas
+        mkdir -p $HOME/.buildozer/android/platform/android-sdk/tools/bin
 
     - name: Compilar con Buildozer
       run: |
         export PATH=$PATH:~/.local/bin
-        # Forzamos la compilación
+        # Intentamos compilar. Si falla al instalar SDK, al menos Buildozer habrá descargado los archivos
+        # Usamos --no-sdk-update para que intente usar lo que ya hay si es posible
+        buildozer android debug || true
+        
+        # EL TRUCO: Si el sdkmanager está en otro lado, creamos un enlace a donde lo busca
+        # Esto busca dónde se instaló realmente el cmdline-tools y lo vincula
+        if [ -d "$HOME/.buildozer/android/platform/android-sdk/cmdline-tools" ]; then
+           ln -s $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager $HOME/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
+        fi
+
+    - name: Compilar (Segundo intento)
+      run: |
+        export PATH=$PATH:~/.local/bin
         buildozer android debug
 
     - name: Guardar el archivo APK resultante
