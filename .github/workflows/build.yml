@@ -28,25 +28,26 @@ jobs:
       run: |
         pip3 install --user --upgrade buildozer cython==0.29.33
 
-    - name: Pre-configurar carpetas para Buildozer
-      run: |
-        # Creamos las carpetas donde Buildozer espera encontrar cosas
-        mkdir -p $HOME/.buildozer/android/platform/android-sdk/tools/bin
-
-    - name: Compilar con Buildozer
+    - name: Compilar con Buildozer (Pre-descarga)
       run: |
         export PATH=$PATH:~/.local/bin
-        # Intentamos compilar. Si falla al instalar SDK, al menos Buildozer habrá descargado los archivos
-        # Usamos --no-sdk-update para que intente usar lo que ya hay si es posible
+        # Intentamos compilar una vez, fallará, pero descargará todo
         buildozer android debug || true
-        
-        # EL TRUCO: Si el sdkmanager está en otro lado, creamos un enlace a donde lo busca
-        # Esto busca dónde se instaló realmente el cmdline-tools y lo vincula
-        if [ -d "$HOME/.buildozer/android/platform/android-sdk/cmdline-tools" ]; then
-           ln -s $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager $HOME/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
-        fi
 
-    - name: Compilar (Segundo intento)
+    - name: Forzar ubicación de SDK Manager
+      run: |
+        # Creamos la estructura que Buildozer necesita desesperadamente
+        mkdir -p $HOME/.buildozer/android/platform/android-sdk/tools/bin
+        
+        # Copiamos todo lo de cmdline-tools a la carpeta donde Buildozer lo busca
+        if [ -d "$HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin" ]; then
+           cp -r $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/* $HOME/.buildozer/android/platform/android-sdk/tools/bin/
+        fi
+        
+        # Damos permisos de ejecución
+        chmod +x $HOME/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
+
+    - name: Compilar (Intento Final)
       run: |
         export PATH=$PATH:~/.local/bin
         buildozer android debug
