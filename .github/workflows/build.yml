@@ -19,34 +19,20 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Instalar dependencias
+    - name: Instalar dependencias del sistema y Buildozer
       run: |
         sudo apt-get update
-        sudo apt-get install -y libncurses5 libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
-        pip3 install --user --upgrade buildozer cython==0.29.33
-
-    - name: Pre-instalar Android SDK
-      run: |
-        # Descargar herramientas de línea de comandos (cmdline-tools)
-        mkdir -p $HOME/.buildozer/android/platform/android-sdk/cmdline-tools
-        wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O tools.zip
-        unzip -q tools.zip -d $HOME/.buildozer/android/platform/android-sdk/cmdline-tools
-        mv $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/cmdline-tools $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest
-        rm tools.zip
-        
-        # Aceptar licencias
-        yes | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
-        
-        # Instalar plataforma necesaria
-        $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0"
+        # Instalamos las librerías oficiales exactas que pide Kivy para compilar
+        sudo apt-get install -y zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+        pip3 install --user --upgrade Cython==0.29.33 buildozer
 
     - name: Compilar APK
       run: |
         export PATH=$PATH:~/.local/bin
-        # Buildozer ahora encontrará el SDK pre-instalado y no dará error
+        # Dejamos que Buildozer haga su trabajo de forma natural
         buildozer android debug
 
-    - name: Guardar el archivo APK resultante
+    - name: Guardar el APK
       uses: actions/upload-artifact@v4
       with:
         name: Mi-Bodega-APK

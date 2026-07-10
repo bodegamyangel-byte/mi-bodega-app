@@ -115,7 +115,7 @@ android.api = 33
 android.minapi = 21
 
 # (int) Android SDK version to use
-android.sdk = 33
+# android.sdk = 20
 
 # (str) Android NDK version to use
 android.ndk = 25b
@@ -141,7 +141,7 @@ android.ndk_api = 21
 # agreements. This is intended for automation only. If set to False,
 # the default, you will be shown the license when first running
 # buildozer.
-# android.accept_sdk_license = True
+android.accept_sdk_license = True
 
 # (str) Android entry point, default is ok for Kivy-based app
 #android.entrypoint = org.kivy.android.PythonActivity
@@ -465,7 +465,7 @@ warn_on_root = 1
 #   Buildozer supports lists - i.e.
 #       [app]
 #       source.include_exts = py,png,jpg
-#       #                     ^ This is a list.
+#       #                    ^ This is a list.
 #
 #       [app:source.include_exts]
 #       py
